@@ -1,6 +1,7 @@
 #include "random_generator.h"
-#include <stdexcept>  // Include for std::invalid_argument
-#include <cstdint>    // Include for uint64_t
+#include <cstdint>
+#include <stdexcept>
+#include <iostream>
 
 // Parameters for the LCG
 const uint64_t a = 1664525;
@@ -17,12 +18,39 @@ double my_random(unsigned int& seed) {
     seed = lcg(seed);
     return static_cast<double>(seed) / m;
 }
+int random_sample(DistributionType type, const DistributionParams& params, unsigned int& seed) {
+    double rand_num;
 
-// Generate Bernoulli random variable
-int random_bernoulli(double p, unsigned int& seed) {
-    if (p < 0.0 || p > 1.0) {
-        throw std::invalid_argument("Probability p must be in the range [0, 1]");
+    switch (type) {
+    case DistributionType::Bernoulli:
+        // Validate probability
+        if (params.p < 0.0 || params.p > 1.0) {
+            throw std::invalid_argument("Probability p must be in the range [0, 1]");
+        }
+        rand_num = my_random(seed);
+        return (rand_num < params.p) ? 1 : 0;
+
+    case DistributionType::Binomial: {
+        // Validate probability and number of trials
+        if (params.p < 0.0 || params.p > 1.0) {
+            throw std::invalid_argument("Probability p must be in the range [0, 1]");
+        }
+        if (params.n < 0) {
+            throw std::invalid_argument("Number of trials n must be non-negative");
+        }
+
+        // Binomial calculation
+        int successes = 0;
+        for (int i = 0; i < params.n; ++i) {
+            rand_num = my_random(seed);
+            if (rand_num < params.p) {
+                successes++;
+            }
+        }
+        return successes;
     }
-    double rand_num = my_random(seed);
-    return (rand_num < p) ? 1 : 0;
+
+    default:
+        throw std::invalid_argument("Unsupported distribution type");
+    }
 }

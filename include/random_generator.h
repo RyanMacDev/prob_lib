@@ -1,13 +1,23 @@
 #ifndef RANDOM_GENERATOR_H
 #define RANDOM_GENERATOR_H
 
-// PRNG function
-unsigned int lcg(unsigned int seed);
+#include <stdexcept>
+#include <variant>
+#include <string>
 
-// Generate random numbers in [0, 1)
-double my_random(unsigned int& seed);
+// Enum for distribution types
+enum class DistributionType {
+    Bernoulli,
+    Binomial
+};
 
-// Generate Bernoulli random variable
-int random_bernoulli(double p, unsigned int& seed);
+// Struct for distribution parameters
+struct DistributionParams {
+    double p; // Success probability (for Bernoulli and Binomial)
+    int n;    // Number of trials (for Binomial only, optional for Bernoulli)
+};
+
+// Generalized random sampler
+int random_sample(DistributionType type, const DistributionParams& params, unsigned int& seed);
 
 #endif // RANDOM_GENERATOR_H
